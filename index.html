@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard – 12consulting</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #191d46;
+      --bg-alt: #131736;
+      --panel: #101330;
+
+      --accent: #c5ff00;
+      --accent-soft: rgba(197, 255, 0, 0.12);
+
+      --text: #e5e7eb;
+      --muted: #a5a7c4;
+
+      --danger: #ff6b6b;
+
+      --radius-xl: 22px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+
+      --shadow-soft: 0 18px 50px rgba(0, 0, 0, 0.55);
+      --transition-fast: 0.2s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #232852 0, #191d46 40%, #050517 100%);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+    }
+
+    /* NOVÝ LAYOUT – 3 SLOUPCE */
+    .layout {
+      display: flex;
+      width: 100%;
+      height: 100vh;
+      max-width: 1700px;
+      margin: auto;
+      padding: 18px 20px 24px 20px;
+      gap: 18px;
+    }
+
+    .col-left {
+      width: 50vw;
+      max-width: 50%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .col-center,
+    .col-right {
+      width: 25vw;
+      max-width: 25%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, var(--bg-alt) 0, var(--panel) 60%, #020617 100%);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-soft);
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(197, 255, 0, 0.12), transparent 60%);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 8px rgba(197, 255, 0, 0.8);
+    }
+
+    .subtitle {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .time-main {
+      font-size: 2.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+
+    .time-secondary {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .pill-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .pill {
+      font-size: 0.75rem;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: var(--muted);
+      background: rgba(15, 23, 42, 0.5);
+    }
+
+    .pill-accent {
+      border-color: rgba(197, 255, 0, 0.8);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    /* Weather */
+    .weather-main {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-top: 12px;
+    }
+
+    .weather-temp {
+      font-size: 2.6rem;
+      font-weight: 600;
+    }
+
+    .weather-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      text-transform: capitalize;
+    }
+
+    .weather-extra {
+      display: flex;
+      gap: 14px;
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+
+    .weather-extra span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .bullet {
+      width: 4px;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--muted);
+    }
+
+    /* Calendar container */
+    .iframe-wrapper {
+      flex: 1;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid rgba(55, 65, 81, 0.7);
+      min-height: 460px;
+    }
+
+    .iframe-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #020617;
+    }
+
+    /* Tasks panel */
+    .tasks-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 5px;
+      font-size: 0.85rem;
+    }
+
+    .task {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: var(--radius-md);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(51, 65, 85, 0.8);
+    }
+
+    .task input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--accent);
+    }
+
+    .task span {
+      flex: 1;
+    }
+
+    .task span.done {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .tasks-footer {
+      margin-top: auto;
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.78rem;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
+
+    /* Fullscreen button + tip */
+    .fullscreen-btn {
+      position: fixed;
+      top: 10px;
+      right: 16px;
+      z-index: 50;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(197, 255, 0, 0.7);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--accent);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .fullscreen-hint {
+      position: fixed;
+      left: 16px;
+      bottom: 10px;
+      z-index: 40;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .fullscreen-hint kbd {
+      padding: 2px 5px;
+      border-radius: 4px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      background: rgba(15, 23, 42, 0.9);
+      font-size: 0.7rem;
+    }
+
+    /* Mobile fallback */
+    @media (max-width: 1100px) {
+      body {
+        overflow: auto;
+        height: auto;
+      }
+
+      .layout {
+        flex-direction: column;
+        height: auto;
+      }
+
+      .col-left,
+      .col-center,
+      .col-right {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- FULLSCREEN BUTTON -->
+  <button id="fullscreen-btn" class="fullscreen-btn">
+    <span>⛶</span>
+    <span>Celá obrazovka</span>
+  </button>
+
+  <div class="fullscreen-hint" id="fullscreen-hint">
+    Tip: Stiskni <kbd>F11</kbd> pro plný režim bez lišt prohlížeče.
+  </div>
+
+  <!-- LAYOUT START -->
+  <div class="layout">
+
+    <!-- LEFT COLUMN (Calendar) -->
+    <div class="col-left">
+      <section class="card" style="flex:1;">
+        <div class="card-inner">
+          <div class="card-header">
+            <div>
+              <div class="title">
+                <span class="title-dot"></span>
+                Kalendář
+              </div>
+              <div class="subtitle">Google Kalendář – osobní + sdílené</div>
+            </div>
+          </div>
+
+          <div class="iframe-wrapper">
+            <iframe
+              src="https://calendar.google.com/calendar/embed?mode=WEEK&ctz=Europe%2FPrague&wkst=2&bgcolor=%23191d46&showPrint=0&showTabs=0&showTitle=0&showNav=1&src=c3RlaW4uZnJhbnRpc2VrQGdtYWlsLmNvbQ&src=OTVlZWEyZTk0ZjI0YmQ3MDhjNzNmNmJhM2VhZGRiNmMyOTViMjkyYmY0ZGNiNWY4ZGYxNzdlMzBlYWZiYmVmOEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=YTZlM2E0YzU5MWI4NzVhMmI1N2I1YjY5ZjYzMWJkN2U1NjY1Zjg3NzBjZWU1NmMzM2Y4MzM2OTE0YWZmZmNjNEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=YzE2YWE3NDJmMWQ0OTAyNWI0NDIwZjJhZjE0YmI0NWIyZTUyNTgxNDc2NjEwZGZkNmQ0M2E3YjEyNWI1ZGVjZkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&color=%23c5ff00"
+              frameborder="0" scrolling="no"></iframe>
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+    <!-- CENTER COLUMN (Clock, Weather) -->
+    <div class="col-center">
+
+      <!-- CLOCK PANEL -->
+      <section class="card">
+        <div class="card-inner">
+
+          <div class="card-header">
+            <div>
+              <div class="title">
+                <span class="title-dot"></span>
+                12consulting · Dashboard
+              </div>
+              <div class="subtitle">Chromebook · osobní nástěnka</div>
+            </div>
+          </div>
+
+          <div id="time" class="time-main">--:--:--</div>
+          <div id="date" class="time-secondary">Načítám datum…</div>
+
+          <div class="pill-row">
+            <div class="pill pill-accent" id="next-refresh">Aktualizace dat: --:--</div>
+            <div class="pill">Časové pásmo: <span id="tz"></span></div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- WEATHER PANEL -->
+      <section class="card" style="flex:1;">
+        <div class="card-inner">
+
+          <div class="card-header">
+            <div>
+              <div class="title">
+                <span class="title-dot"></span>
+                Počasí
+              </div>
+              <div class="subtitle">Jablonec nad Nisou · Yr.no / MET Norway</div>
+            </div>
+          </div>
+
+          <div class="weather-main">
+            <div>
+              <div id="weather-temp" class="weather-temp">--°C</div>
+              <div id="weather-desc" class="weather-desc">Načítám počasí…</div>
+            </div>
+
+            <div style="text-align:right; font-size:0.8rem; color:var(--muted);">
+              <div id="weather-city">Lokalita: Jablonec nad Nisou</div>
+              <div id="weather-updated">Aktualizace: --:--</div>
+            </div>
+          </div>
+
+          <div class="weather-extra" id="weather-extra"></div>
+
+          <div class="pill-row">
+            <div class="pill">Zdroj: api.met.no (Yr.no)</div>
+            <div class="pill">Interval: 15 min</div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+
+    <!-- RIGHT COLUMN (Tasks) -->
+    <div class="col-right">
+      <section class="card" style="flex:1;">
+        <div class="card-inner">
+
+          <div class="card-header">
+            <div>
+              <div class="title">
+                <span class="title-dot"></span>
+                Úkoly dnes
+              </div>
+              <div class="subtitle">Lokální mini ToDo + Google Tasks</div>
+            </div>
+          </div>
+
+          <div class="tasks-body" id="tasks-list">
+            <label class="task">
+              <input type="checkbox" data-task="porada" />
+              <span>Zápis z poslední porady – dokončit / zkontrolovat</span>
+            </label>
+
+            <label class="task">
+              <input type="checkbox" data-task="kotle" />
+              <span>Prověřit nabídky / servis elektrokotle</span>
+            </label>
+
+            <label class="task">
+              <input type="checkbox" data-task="dashboard" />
+              <span>Doladit / otestovat dashboard na Chromebooku</span>
+            </label>
+          </div>
+
+          <div class="tasks-footer">
+            <span>Zaškrtnutí se ukládá lokálně (v Chromu).</span>
+            <a class="link" target="_blank" href="https://tasks.google.com/embed/list/~default?pli=1">
+              Otevřít Google Tasks
+            </a>
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+  </div> <!-- end .layout -->
+
+
+  <!-- ===================== JAVASCRIPT ===================== -->
+
+  <script>
+    /* ---------- FULLSCREEN ---------- */
+    const fsBtn = document.getElementById("fullscreen-btn");
+    const fsHint = document.getElementById("fullscreen-hint");
+
+    async function toggleFullscreen() {
+      try {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+          fsBtn.innerHTML = "<span>↙</span><span>Ukončit celou obrazovku</span>";
+          fsHint.style.display = "none";
+        } else {
+          await document.exitFullscreen();
+          fsBtn.innerHTML = "<span>⛶</span><span>Celá obrazovka</span>";
+          fsHint.style.display = "flex";
+        }
+      } catch (e) {
+        console.error("Fullscreen error:", e);
+      }
+    }
+
+    fsBtn.addEventListener("click", toggleFullscreen);
+
+    setTimeout(() => {
+      if (fsHint) fsHint.style.opacity = "0";
+      setTimeout(() => fsHint && (fsHint.style.display = "none"), 2000);
+    }, 20000);
+
+
+    /* ---------- CLOCK ---------- */
+    function updateClock() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+
+      document.getElementById("time").textContent = `${hh}:${mm}:${ss}`;
+
+      const dateFmt = now.toLocaleDateString("cs-CZ", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+      document.getElementById("date").textContent =
+        dateFmt.charAt(0).toUpperCase() + dateFmt.slice(1);
+
+      document.getElementById("tz").textContent =
+        Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+
+
+    /* ---------- POČASÍ (YR.NO) ---------- */
+    const LAT = 50.724;
+    const LON = 15.171;
+
+    function mapSymbolCode(code) {
+      if (!code) return "Bez popisu";
+      const base = code.split("_")[0];
+      const dict = {
+        clearsky: "Jasno",
+        fair: "Polojasno",
+        partlycloudy: "Částečně oblačno",
+        cloudy: "Zataženo",
+        lightrain: "Slabý déšť",
+        rain: "Déšť",
+        heavyrain: "Silný déšť",
+        rainshowers: "Přeháňky",
+        lightsnow: "Slabé sněžení",
+        snow: "Sněžení",
+        heavysnow: "Silné sněžení",
+        fog: "Mlha",
+        sleet: "Déšť se sněhem",
+        thunderstorm: "Bouřka"
+      };
+      return dict[base] || "Počasí";
+    }
+
+    async function loadWeather() {
+      try {
+        const res = await fetch(
+          `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${LAT}&lon=${LON}`
+        );
+        const data = await res.json();
+
+        const nowPoint = data.properties.timeseries[0];
+        const details = nowPoint.data.instant.details;
+
+        const temp = details.air_temperature;
+        const humidity = details.relative_humidity;
+        const wind = details.wind_speed;
+
+        const next = nowPoint.data.next_1_hours || nowPoint.data.next_6_hours;
+        const descCode = next?.summary?.symbol_code || "";
+
+        document.getElementById("weather-temp").textContent =
+          Math.round(temp) + "°C";
+
+        document.getElementById("weather-desc").textContent =
+          mapSymbolCode(descCode);
+
+        const extra = document.getElementById("weather-extra");
+        extra.innerHTML = `
+          <span><span class="bullet"></span> Teplota: ${temp.toFixed(1)} °C</span>
+          <span><span class="bullet"></span> Vlhkost: ${humidity} %</span>
+          <span><span class="bullet"></span> Vítr: ${wind.toFixed(1)} m/s</span>
+        `;
+
+        const n = new Date();
+        document.getElementById("weather-updated").textContent =
+          "Aktualizace: " +
+          n.getHours().toString().padStart(2, "0") + ":" +
+          n.getMinutes().toString().padStart(2, "0");
+
+      } catch (e) {
+        document.getElementById("weather-desc").textContent =
+          "Chyba načítání počasí";
+        console.error(e);
+      }
+    }
+
+    loadWeather();
+    setInterval(loadWeather, 15 * 60 * 1000);
+
+
+    /* Next refresh label */
+    function updateNextRefresh() {
+      const t = new Date(Date.now() + 900000);
+      document.getElementById("next-refresh").textContent =
+        "Aktualizace dat ~ " +
+        t.getHours().toString().padStart(2, "0") + ":" +
+        t.getMinutes().toString().padStart(2, "0");
+    }
+
+    updateNextRefresh();
+    setInterval(updateNextRefresh, 60000);
+
+
+    /* ---------- ÚKOLY (LOCALSTORAGE) ---------- */
+    const taskBoxes = document.querySelectorAll("#tasks-list input[type='checkbox']");
+    const KEY = "dashboardTasks";
+
+    function loadTasks() {
+      const saved = localStorage.getItem(KEY);
+      if (!saved) return;
+
+      const state = JSON.parse(saved);
+      taskBoxes.forEach(cb => {
+        const id = cb.dataset.task;
+        if (state[id]) cb.checked = true;
+        cb.closest(".task").querySelector("span").classList.toggle("done", cb.checked);
+      });
+    }
+
+    function saveTasks() {
+      const obj = {};
+      taskBoxes.forEach(cb => (obj[cb.dataset.task] = cb.checked));
+      localStorage.setItem(KEY, JSON.stringify(obj));
+    }
+
+    taskBoxes.forEach(cb =>
+      cb.addEventListener("change", () => {
+        cb.closest(".task").querySelector("span").classList.toggle("done", cb.checked);
+        saveTasks();
+      })
+    );
+
+    loadTasks();
+  </script>
+
+</body>
+</html>
